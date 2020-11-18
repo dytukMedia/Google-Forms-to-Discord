@@ -1,74 +1,69 @@
-/*
-        Feel free to contact me if you need assistance. I'll happily help :) https://danielytuk.co.uk/go/discord
-        Fill in what you want and what you don't, the code is smart so it'll know what you've chosen.
-*/
+//Please enter your webhooks below, inside the quotations, you can have multiple, as long as you format like this: "LINK_1", "LINK_2", "LINK_3"
+const webhooks = [""];
 
-const webhooks = [ "" ];
+//This defines the variables, of which can be filled out; these are completely optional.
 
-/* Start of optional section */
-const title = ""; /*    Add a nice custom title, to make the script truly yours.    */
-const avatarImage = ""; /*    The logo of your brand or Discord server, maybe?    */
-const shortDescription = ""; /*    A little bit of information about the response received, so you don't forget in the future?    */
-const colour = ""; /*    A custom colour? Example: #78A8C6    */
-const mention = ""; /*Mention yourself or a role - it should look like <@!7890975289098612689> or <@&7890975289098612689>    */
-/* End of optional section */
+// Title can either be what you enter below, but if you leave blank, the script will fill it with the form title.
+// Avatar Image is the tiny thumbnail you see on embeds, this is great for a logo.
+// Short Description is great if you wish to add a tiny bit of information.
+// Colour allows you to enter a custom hex color, if left blank, a colour will be randomly chosen each time.
+// Mention is great if you want to be alerted, or you want a certain role alerted. Mention either the user/role in Discord with a \ at the beginning to the formatting.
+// You can also put custom text into Mention if you like.
+const title = "", avatarImage = "", shortDescription = "", colour = "", mention = "";
 
-
-/*
-        PLEASE DO NOT MESS WITH THE CODE BELOW IF YOU DON'T KNOW WHAT YOU'RE DOING.
-            I haven't got all day to troubleshoot issues, caused by tampering.
-                This warning was added after the recording of the new video.
-                        https://www.youtube.com/watch?v=3OWl38WHCfE
-*/
-
-
-const form = FormApp.getActiveForm();
-const allResponses = form.getResponses();
-const latestResponse = allResponses[ allResponses.length - 1 ];
-const response = latestResponse.getItemResponses();
+// This defines and fetches the current form, all the responses from the form, the latest response received, and the items from the q&a's from the latest res.
+// Items is set up to store the Question & Answer(s)
+const form = FormApp.getActiveForm(), allResponses = form.getResponses(), latestResponse = allResponses[allResponses.length - 1], response = latestResponse.getItemResponses();
 var items = [];
 
-if ( !webhooks ) throw "You forgot the webhook :)";
+// Just a safe check to make sure you've entered a webhook.
+if (!webhooks) throw "You forgot the webhook :)";
 
-function plainText( e ) {
-    for ( var i = 0; i < response.length; i++ ) {
-        const question = response[ i ].getItem().getTitle();
-        const answer = response[ i ].getResponse();
-        const parts = answer.match( /[\s\S]{1,1024}/g ) || [];
-
-        if ( answer == "" ) continue;
-        for ( var j = 0; j < parts.length; j++ ) { if ( j == 0 ) items.push( { "name": question, "value": parts[ j ] } ); }
-
-        function data( item ) { return [ `**${ item.name }**`, `${ item.value }` ].join( "\n" ); }
-    }
-    
-    try {
-      const textSetup = { "method": "post", "headers": { "Content-Type": "application/json" }, "payload": JSON.stringify( { "content": `${ ( mention ) ? `${ mention } ` : `` } ${ ( title ) ? `**${ title }**` : `**${ form.getTitle() }**` }\n${ ( shortDescription ) ? `${ shortDescription }\n\n---\n\n` : `---\n\n` }${ items.map( data ).join( "\n\n" ) }` } ) };
-      for ( var i = 0; i < webhooks.length; i++ ) { UrlFetchApp.fetch( webhooks[ i ], textSetup ); }
-      return form.deleteResponse( latestResponse.getId() );
-    } catch(error) {return;}
+// This loops through our latest response and fetches the Question titles/answers; then stores them in the items array above.
+for (var i = 0; i < response.length; i++) {
+    const question = response[i].getItem().getTitle(), answer = response[i].getResponse();
+    if (answer == "") continue;
+    items.push({ "name": question, "value": answer });
+    function data (item) { return [`**${item.name}**`, `${item.value}`].join("\n"); }
 }
 
-function embedText( e ) {
-    for ( var i = 0; i < response.length; i++ ) {
-        const question = response[ i ].getItem().getTitle();
-        const answer = response[ i ].getResponse();
+// Sadly, The plain text versions formatting is ugly and messed up.
+// This will be fixed at a later date.
 
-        if ( answer == "" ) continue;
-        items.push( { "name": question, "value": answer } );
+        /*function plainText (e) {
 
-        function data( item ) { return [ `**${ item.name }**`, `${ item.value }` ].join( "\n" ); }
-    }
+            // A webhook construct, which sets up the correct formatting for sending to Discord.
+            const text = {
+                "method": "post",
+                "headers": { "Content-Type": "application/json" },
+                "payload": JSON.stringify({
+                    "content": `${mention ? `${mention} ` : ''}${title ? `**${title}**\n` : `**${form.getTitle()}**\n`}${shortDescription ? `${shortDescription}\n\n${items.map(data).join('\n\n')}` : items.map(data).join('\n\n')}`
+                }),
+            };
 
-    try {
-      if ( avatarImage !== null ) {
-          const embedSetup = { "method": "post", "headers": { "Content-Type": "application/json" }, muteHttpExceptions: true, "payload": JSON.stringify( { "content": ( mention ) ? `${ mention }` : " ", "embeds": [ { "title": ( title ) ? title : form.getTitle(), "thumbnail": { "url": encodeURI( avatarImage ) }, "color": ( colour ) ? parseInt(colour.substr(1), 16) : Math.floor( Math.random() * 16777215 ), "description": ( shortDescription ) ? `${ shortDescription }\n\n${ items.map( data ).join( '\n\n' ) }` : items.map( data ).join( '\n\n' ), "timestamp": new Date().toISOString(), } ] } ) };
-          for ( var i = 0; i < webhooks.length; i++ ) { UrlFetchApp.fetch( webhooks[ i ], embedSetup ); }
-          return form.deleteResponse( latestResponse.getId() );
-      } else {
-          const embedSetup = { "method": "post", "headers": { "Content-Type": "application/json" }, muteHttpExceptions: true, "payload": JSON.stringify( { "content": ( mention ) ? `${ mention }` : " ", "embeds": [ { "title": ( title ) ? title : form.getTitle(), "color": ( colour ) ? parseInt(colour.substr(1), 16) : Math.floor( Math.random() * 16777215 ), "description": ( shortDescription ) ? `${ shortDescription }\n\n${ items.map( data ).join( '\n\n' ) }` : items.map( data ).join( '\n\n' ), "timestamp": new Date().toISOString(), } ] } ) };
-          for ( var i = 0; i < webhooks.length; i++ ) { UrlFetchApp.fetch( webhooks[ i ], embedSetup ); }
-          return form.deleteResponse( latestResponse.getId() );
-      }
-    } catch(error) {return;}
+            // We now loop through our webhooks and send them one by one to the respectful channels.
+            for (var i = 0; i < webhooks.length; i++) { return UrlFetchApp.fetch(webhooks[i], text); };
+        }
+        */
+
+function embedText (e) {
+
+    // A webhook embed construct, which sets up the correct formatting for sending to Discord.
+    const embed = {
+        "method": "post",
+        "headers": { "Content-Type": "application/json" },
+        "payload": JSON.stringify({
+            "content": mention ? mention : '',
+            "embeds": [{
+                "title": title ? title : form.getTitle(), // Either the set title or the forms title.
+                "description": shortDescription ? `${shortDescription}\n\n${items.map(data).join('\n\n')}` : items.map(data).join('\n\n'),
+                "thumbnail": { url: avatarImage ? encodeURI(avatarImage) : null }, // The tiny image in the right of the embed
+                "color": colour ? parseInt(colour.substr(1), 16) : Math.floor(Math.random() * 16777215), //Either the set colour or random.
+                "timestamp": new Date().toISOString()
+            }]
+        }),
+    };
+
+    // We now loop through our webhooks and send them one by one to the respectful channels.
+    for (var i = 0; i < webhooks.length; i++) { return UrlFetchApp.fetch(webhooks[i], embed); };
 }
