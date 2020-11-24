@@ -36,6 +36,7 @@ for (var i = 0; i < response.length; i++) {
             const text = {
                 "method": "post",
                 "headers": { "Content-Type": "application/json" },
+                "muteHttpExceptions": true,
                 "payload": JSON.stringify({
                     "content": `${mention ? `${mention} ` : ''}${title ? `**${title}**\n` : `**${form.getTitle()}**\n`}${shortDescription ? `${shortDescription}\n\n${items.map(data).join('\n\n')}` : items.map(data).join('\n\n')}`
                 }),
@@ -52,6 +53,7 @@ function embedText (e) {
     const embed = {
         "method": "post",
         "headers": { "Content-Type": "application/json" },
+        "muteHttpExceptions": true,
         "payload": JSON.stringify({
             "content": mention ? mention : '',
             "embeds": [{
