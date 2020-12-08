@@ -30,6 +30,22 @@ for (var i = 0; i < response.length; i++) {
 
 if(items.map(data).toString().length + shortDescription.length > 1999) throw "Discord limit reached. Please add limits to your questions!";
 
+function plainText (e) {
+
+    // A webhook construct, which sets up the correct formatting for sending to Discord.
+    const text = {
+        "method": "post",
+        "headers": { "Content-Type": "application/json" },
+        "muteHttpExceptions": true,
+        "payload": JSON.stringify({
+            "content": `${mention ? mention : ''}${title ? `**${title}**` : `**${form.getTitle()}**`}\n\n${shortDescription ? `${shortDescription}\n\n${items.map(data).join('\n\n')}` : items.map(data).join('\n\n')}`
+        }),
+    };
+
+    // We now loop through our webhooks and send them one by one to the respectful channels.
+    for (var i = 0; i < webhooks.length; i++) { UrlFetchApp.fetch(webhooks[i], text); };
+}
+
 function embedText (e) {
 
     // A webhook embed construct, which sets up the correct formatting for sending to Discord.
