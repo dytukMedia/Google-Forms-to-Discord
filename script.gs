@@ -28,11 +28,9 @@ for (var i = 0; i < response.length; i++) {
     function data (item) { return [`**${item.name}**`, `${item.value}`].join("\n"); }
 }
 
-// The text version has been discontinued temporaily.
+if(items.map(data).toString().length + shortDescription.length > 1999) throw "Discord limit reached. Please add limits to your questions!";
 
 function embedText (e) {
-
-    if(items.map(data).toString().length + shortDescription.length > 1900) throw "Discord limit reached. Please add limits to your questions!";
 
     // A webhook embed construct, which sets up the correct formatting for sending to Discord.
     const embed = {
