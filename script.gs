@@ -1,5 +1,5 @@
 //Please enter your webhooks below, inside the quotations, you can have multiple, as long as you format like this: "LINK_1", "LINK_2", "LINK_3"
-const webhooks = [""];
+const webhooks = ["https://discord.com/api/webhooks/784809185211973653/hDx50xJYEqcKBcupHAomOCC61VrPpRb1bS1ahN3i5cf4bNQonKvI2h_99B_LsJ6Y62Cj"];
 
 //This defines the variables, of which can be filled out; these are completely optional.
 
@@ -18,7 +18,11 @@ const form = FormApp.getActiveForm(), allResponses = form.getResponses(), latest
 var items = [];
 
 // Just a safe check to make sure you've entered a webhook.
-if (!webhooks) throw "You forgot the webhook :)";
+if (!webhooks.length > 0) throw "You forgot the webhook :)";
+
+//An extra check as people have been having issues.
+if(!avatarImage.match(/\.(jpeg|jpg|gif|png)$/)) throw "Image URL is not a direct link";
+
 
 // This loops through our latest response and fetches the Question titles/answers; then stores them in the items array above.
 for (var i = 0; i < response.length; i++) {
