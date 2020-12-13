@@ -21,7 +21,7 @@ var items = [];
 if (!webhooks.length > 0) throw "You forgot the webhook :)";
 
 //An extra check as people have been having issues.
-if(!avatarImage.match(/\.(jpeg|jpg|gif|png)$/)) throw "Image URL is not a direct link";
+if(avatarImage && !avatarImage.match(/\.(jpeg|jpg|gif|png)$/)) throw "Image URL is not a direct link";
 
 
 // This loops through our latest response and fetches the Question titles/answers; then stores them in the items array above.
