@@ -1,29 +1,46 @@
-//Please enter your webhooks below, inside the quotations, you can have multiple, as long as you format like this: "LINK_1", "LINK_2", "LINK_3"
+// Please enter your webhooks below, inside the quotations, you can have multiple, as long as you format like this: "LINK_1", "LINK_2", "LINK_3"
 const webhooks = [""];
 
-//This defines the variables, of which can be filled out; these are completely optional.
+// This defines the variables, of which can be filled out; these are completely optional.
 
 // Title can either be what you enter below, but if you leave blank, the script will fill it with the form title.
 // Avatar Image is the tiny thumbnail you see on embeds, this is great for a logo.
 // Short Description is great if you wish to add a tiny bit of information.
 // Colour allows you to enter a custom hex color, if left blank, a colour will be randomly chosen each time.
 // Mention is great if you want to be alerted, or you want a certain role alerted. Mention either the user/role in Discord with a \ at the beginning to the formatting.
+// Type is a new required variable, state either "EMBED" or "TEXT" - the default is embed.
 
-const title = "", avatarImage = "", shortDescription = "", colour = "", mention = "";
+const title = "", avatarImage = "", shortDescription = "", colour = "", mention = "", type = "";
+
+// Bonus features 😃
+// You can turn these ON or OFF, defaults to the values entered below.
+
+const bonusFeatures = {
+    convert2Link: 'ON', // Links in embeds will be clickable | Text links won't embed.
+    convert2Mention: 'ON' // Checks if there's a Discord ID, and converts it into a mention.
+}
 
 
 // This defines and fetches the current form, all the responses from the form, the latest response received, and the items from the Q&A's from the latest res.
 // Items is set up to store the Q&A's.
-const form = FormApp.getActiveForm(), allResponses = form.getResponses(), latestResponse = allResponses[allResponses.length - 1], response = latestResponse.getItemResponses();
+const form = FormApp.getActiveForm(), allResponses = form.getResponses(), latestResponse = allResponses[allResponses.length - 1];
+let response;
 var items = [];
+
+// Checks if there's a response, if not - throw error.
+try {
+    response = latestResponse.getItemResponses()
+} catch (error) {
+    throw "No Responses found in your form."
+}
 
 // Just a safe check to make sure you've entered a webhook.
 for (const hook of webhooks) {
     if (!/^(?:https?:\/\/)?(?:www\.)?(?:(?:canary|ptb)\.)?discord(?:app)?\.com\/api\/webhooks\/\d+\/[\w-+]+$/i.test(hook)) throw `Webhook ${i + 1 || 1} is not valid.`;
 }
 
-//An extra check as people have been having issues.
-if (avatarImage && !avatarImage.match(/\.(jpeg|jpg|gif|png)$/)) throw "Image URL is not a direct link";
+// An extra check as people have been having issues.
+if (avatarImage && !/\.(jpeg|jpg|gif|png)$/.test(avatarImage)) throw "Image URL is not a direct link";
 
 
 // This loops through our latest response and fetches the Question titles/answers; then stores them in the items array above.
@@ -31,12 +48,29 @@ for (var i = 0; i < response.length; i++) {
     const question = response[i].getItem().getTitle(), answer = response[i].getResponse();
     if (answer == "") continue;
     items.push({ "name": question, "value": answer });
-    function data (item) { return [`**${item.name}**`, `${item.value}`].join("\n"); }
+
+    function data(item) {
+        const linkValidate = /(?:(?:https?|http?):\/\/)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])/i;
+
+        // Checks if there's an ID, if there is, convert into a mention.
+        if (bonusFeatures.convert2Mention == 'ON' && !isNaN(item.value) && item.value.length == 18) item.value = `<@!${item.value}>`;
+
+        // Checks if type is text, or default to embed.
+        if (bonusFeatures.convert2Link == 'ON' && type.toLowerCase() !== 'text') {
+            // Validates the link, if it's true, make it a hyperlink for embed.
+            if (linkValidate.test(item.value)) item.value = `[${item.value}](${item.value})`;
+        } else {
+            // Validates the link, if it's true, make it not-embed for text.
+            if (bonusFeatures.convert2Link == 'ON' && linkValidate.test(item.value)) item.value = `<${item.value}>`;
+        }
+
+        return [`**${item.name}**`, `${item.value}`].join("\n");
+    }
 }
 
 if (items.map(data).toString().length + shortDescription.length > 1999) throw "Discord limit reached. Please add limits to your questions!";
 
-function plainText (e) {
+function plainText(e) {
 
     // A webhook construct, which sets up the correct formatting for sending to Discord.
     const text = {
@@ -52,7 +86,7 @@ function plainText (e) {
     for (var i = 0; i < webhooks.length; i++) { UrlFetchApp.fetch(webhooks[i], text); };
 }
 
-function embedText (e) {
+function embedText(e) {
 
     // A webhook embed construct, which sets up the correct formatting for sending to Discord.
     const embed = {
