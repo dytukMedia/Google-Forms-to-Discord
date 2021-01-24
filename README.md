@@ -1,9 +1,9 @@
 <a href='http://dytuk.me/discord' target='_blank'>![alt Discord](https://img.shields.io/discord/659873886271438848?color=7289da&logo=discord&logoColor=white)</a> <a href='https://dytuk.me/support' target='_blank'>![alt support](https://img.shields.io/badge/donate-free%2Fpaid-blue)</a>
 
 # Google Forms to Discord (GF2D)
-Google Forms to Discord, GF2D for  short, is a free Google Apps Script,
+Google Forms to Discord, GF2D for  short, is a free Google Apps Script.
 
-which allows you to send submitted responses to a selected Discord server channel for easy viewing / access.
+It allows you to send submitted responses to a selected Discord server channel for easy viewing / access.
 
 This is perfect for Staff/Appeal Applications, sign-ups, and more.
 
