@@ -1,4 +1,4 @@
-<a href='http://dytuk.me/discord' target='_blank'>![alt Discord](https://img.shields.io/discord/659873886271438848?color=7289da&logo=discord&logoColor=white)</a> <a href='https://dytuk.me/bmac' target='_blank'>![alt support](https://img.shields.io/badge/support-blue)</a>
+<a href='https://dytuk.me/bmac' target='_blank'>![alt support](https://img.shields.io/badge/support-blue)</a>
 
 # Google Forms to Discord (GF2D)
 Google Forms to Discord, GF2D for  short, is a free Google Apps Script.
